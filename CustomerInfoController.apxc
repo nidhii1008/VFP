@@ -1,0 +1,37 @@
+public without sharing class CustomerInfoController {
+    public String firstName { get; set; }
+    public String lastName { get; set; }
+    public String phoneNumber { get; set; }
+    public String email { get; set; }
+    public String website { get; set; }
+    public String language { get; set; }
+   
+    public List<Contact> contacts{get; set;}  
+
+    
+    public void createAccountAndContact() {
+        // Perform input validations
+          if (String.isBlank(firstName) || String.isBlank(lastName) || String.isBlank(phoneNumber) ||
+        String.isBlank(email) || String.isBlank(website) || String.isBlank(language)) {
+        ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'All fields are required.'));
+        return;
+    }
+        if (phoneNumber.length() != 10 || !Pattern.matches('[0-9]{10}', phoneNumber)) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Phone number should be 10 digits.'));
+            return;
+        }
+        if (!Pattern.matches('[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}', email)) {
+            ApexPages.addMessage(new ApexPages.Message(ApexPages.Severity.ERROR, 'Invalid email format.'));
+            return;
+        }
+        
+        // Create Account and Contact
+        Account acc = new Account(Name = firstName + ' ' + lastName, Phone = phoneNumber, Website = website, Language__c = language);
+        insert acc;
+        Contact con = new Contact(FirstName = firstName, LastName=lastName, Phone = phoneNumber, Email = email, AccountId = acc.Id);
+        insert con;
+         
+        contacts = [SELECT Id, FirstName, LastName, Phone, Email, Account.Name, Account.Phone, Account.Website, Account.Language__c FROM Contact];
+    }
+    
+}
